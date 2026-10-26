@@ -1,0 +1,83 @@
+# requests para la extensión REST Client de VS Code
+
+@baseUrl = http://localhost:3000
+@token = {{login.response.body.token}}
+@goalId = {{goal.response.body.goal.id}}
+
+### registro
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "sofia@uninorte.edu.co",
+  "name": "Sofía Palacio",
+  "password": "clave-segura-123"
+}
+
+### login
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "sofia@uninorte.edu.co",
+  "password": "clave-segura-123"
+}
+
+### crear meta
+# @name goal
+POST {{baseUrl}}/goals
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Viaje a Cartagena",
+  "targetAmount": 2000000
+}
+
+### listar metas
+GET {{baseUrl}}/goals
+Authorization: Bearer {{token}}
+
+### ver meta
+GET {{baseUrl}}/goals/{{goalId}}
+Authorization: Bearer {{token}}
+
+### depositar (si se repite con la misma key no se duplica)
+POST {{baseUrl}}/goals/{{goalId}}/movements
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Idempotency-Key: deposito-0001
+
+{
+  "type": "DEPOSIT",
+  "amount": 500000
+}
+
+### retirar más de lo que hay (422)
+POST {{baseUrl}}/goals/{{goalId}}/movements
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Idempotency-Key: retiro-0001
+
+{
+  "type": "WITHDRAWAL",
+  "amount": 900000
+}
+
+### historial
+GET {{baseUrl}}/goals/{{goalId}}/movements
+Authorization: Bearer {{token}}
+
+### cambiar nombre
+PATCH {{baseUrl}}/goals/{{goalId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Viaje a San Andrés"
+}
+
+### eliminar (solo si el saldo está en 0)
+DELETE {{baseUrl}}/goals/{{goalId}}
+Authorization: Bearer {{token}}

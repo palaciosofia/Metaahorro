@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: metaahorro
+      POSTGRES_PASSWORD: metaahorro
+      POSTGRES_DB: metaahorro
+    ports:
+      - '5433:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

@@ -1,0 +1,76 @@
+service: metaahorro
+frameworkVersion: '3'
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  architecture: arm64
+  region: ${opt:region, 'us-east-1'}
+  stage: ${opt:stage, 'dev'}
+  memorySize: 256
+  timeout: 10
+  logRetentionInDays: 7
+  environment:
+    DATABASE_URL: ${env:DATABASE_URL}
+    DATABASE_SSL: ${env:DATABASE_SSL, 'true'}
+    JWT_SECRET: ${env:JWT_SECRET}
+    JWT_EXPIRES_IN_SECONDS: ${env:JWT_EXPIRES_IN_SECONDS, '3600'}
+    NODE_OPTIONS: --enable-source-maps
+  httpApi:
+    cors: true
+
+plugins:
+  - serverless-esbuild
+  - serverless-offline
+
+custom:
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap: true
+    target: node20
+    exclude: ['pg-native']
+  serverless-offline:
+    httpPort: 3000
+    noPrependStageInUrl: true
+
+functions:
+  register:
+    handler: src/modules/users/handlers.register
+    events:
+      - httpApi: { method: POST, path: /auth/register }
+  login:
+    handler: src/modules/users/handlers.login
+    events:
+      - httpApi: { method: POST, path: /auth/login }
+
+  listGoals:
+    handler: src/modules/goals/handlers.listGoals
+    events:
+      - httpApi: { method: GET, path: /goals }
+  createGoal:
+    handler: src/modules/goals/handlers.createGoal
+    events:
+      - httpApi: { method: POST, path: /goals }
+  getGoal:
+    handler: src/modules/goals/handlers.getGoal
+    events:
+      - httpApi: { method: GET, path: '/goals/{id}' }
+  updateGoal:
+    handler: src/modules/goals/handlers.updateGoal
+    events:
+      - httpApi: { method: PATCH, path: '/goals/{id}' }
+  deleteGoal:
+    handler: src/modules/goals/handlers.deleteGoal
+    events:
+      - httpApi: { method: DELETE, path: '/goals/{id}' }
+
+  createMovement:
+    handler: src/modules/movements/handlers.createMovement
+    events:
+      - httpApi: { method: POST, path: '/goals/{id}/movements' }
+  listMovements:
+    handler: src/modules/movements/handlers.listMovements
+    events:
+      - httpApi: { method: GET, path: '/goals/{id}/movements' }
